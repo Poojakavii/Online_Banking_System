@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Customer Dashboard</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+
+body{
+background:#f4f6f9;
+}
+
+.navbar{
+background:#1f3b5b;
+}
+
+.card{
+border:none;
+border-radius:15px;
+}
+
+.metric{
+font-size:28px;
+font-weight:bold;
+color:#1f3b5b;
+}
+
+.sidebar a{
+display:block;
+padding:12px;
+margin-bottom:8px;
+border-radius:8px;
+text-decoration:none;
+color:#1f3b5b;
+font-weight:600;
+}
+
+.sidebar a:hover{
+background:#e9ecef;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark">
+
+<div class="container">
+
+<a class="navbar-brand fw-bold">
+
+🏦 ABC Bank
+
+</a>
+
+<a href="/logout" class="btn btn-light">
+
+Logout
+
+</a>
+
+</div>
+
+</nav>
+
+<div class="container-fluid mt-4">
+
+<div class="row">
+
+<div class="col-md-3">
+
+<div class="card shadow p-3 sidebar">
+
+<h5>{{customer.name}}</h5>
+
+<hr>
+
+<a href="/account">💳 My Account</a>
+
+<a href="/transfer">💸 Fund Transfer</a>
+
+<a href="/beneficiary">👥 Beneficiaries</a>
+
+<a href="/billpayment">🧾 Bill Payment</a>
+
+<a href="/fixeddeposit">🏦 Fixed Deposit</a>
+
+<a href="/loan">📄 Loan</a>
+
+<a href="/transaction">📊 Transactions</a>
+
+<a href="/profile">👤 Profile</a>
+
+</div>
+
+</div>
+
+<div class="col-md-9">
+
+<h3>
+
+Welcome,
+
+{{customer.name}}
+
+</h3>
+
+<div class="row mt-4">
+
+<div class="col-md-3">
+
+<div class="card shadow text-center p-3">
+
+<h6>Balance</h6>
+
+<div class="metric">
+
+₹ {{customer.balance}}
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card shadow text-center p-3">
+
+<h6>Transactions</h6>
+
+<div class="metric">
+
+{{transaction_count}}
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card shadow text-center p-3">
+
+<h6>Loans</h6>
+
+<div class="metric">
+
+{{loan_count}}
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card shadow text-center p-3">
+
+<h6>FDs</h6>
+
+<div class="metric">
+
+{{fd_count}}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card shadow mt-4">
+
+<div class="card-header">
+
+Recent Transactions
+
+</div>
+
+<div class="card-body">
+
+<table class="table table-striped">
+
+<tr>
+
+<th>Date</th>
+
+<th>Type</th>
+
+<th>Amount</th>
+
+<th>Status</th>
+
+</tr>
+
+{% for t in transactions %}
+
+<tr>
+
+<td>{{t.transaction_date}}</td>
+
+<td>{{t.transaction_type}}</td>
+
+<td>₹ {{t.amount}}</td>
+
+<td>{{t.status}}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+
+</html>

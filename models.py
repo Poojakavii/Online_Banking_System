@@ -718,3 +718,67 @@ def admin_total_fd():
     conn.close()
 
     return total
+# ---------------- UPDATE CUSTOMER PROFILE ----------------
+
+def update_customer(
+    customer_id,
+    name,
+    email,
+    phone,
+    gender,
+    address
+):
+
+    conn = get_db_connection()
+
+    cursor = conn.cursor()
+
+    sql = """
+    UPDATE customers
+    SET
+    name=%s,
+    email=%s,
+    phone=%s,
+    gender=%s,
+    address=%s
+    WHERE customer_id=%s
+    """
+
+    cursor.execute(
+        sql,
+        (
+            name,
+            email,
+            phone,
+            gender,
+            address,
+            customer_id
+        )
+    )
+
+    conn.commit()
+
+    cursor.close()
+
+    conn.close()
+    # ---------------- GET ALL CUSTOMERS (ADMIN) ----------------
+
+def get_all_customers():
+
+    conn = get_db_connection()
+
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT *
+        FROM customers
+        ORDER BY customer_id DESC
+    """)
+
+    customers = cursor.fetchall()
+
+    cursor.close()
+
+    conn.close()
+
+    return customers

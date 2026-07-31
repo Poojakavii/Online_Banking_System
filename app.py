@@ -54,22 +54,34 @@ def register():
         gender = request.form['gender']
         account_type = request.form['account_type']
 
-        register_customer(
-            name,
-            email,
-            phone,
-            password,
-            address,
-            dob,
-            gender,
-            account_type
+    try:
+
+       register_customer(
+        name,
+        email,
+        phone,
+        password,
+        address,
+        dob,
+        gender,
+        account_type,
+        bank_name,
+        account_number,
+        ifsc,
+        balance
+    )
+
+    except Exception as e:
+
+        if "Duplicate entry" in str(e):
+
+          return render_template(
+            "register.html",
+            error="Email already registered. Please use another email."
         )
 
-        return redirect(url_for('customer_login'))
-
-    return render_template("register.html")
-
-
+    else:
+        raise
 # ---------------- LOGIN ----------------
 
 @app.route('/customer_login', methods=['GET', 'POST'])
@@ -120,6 +132,8 @@ def customer_dashboard():
 
 # ---------------- PROFILE ----------------
 
+# ---------------- PROFILE ----------------
+from models import update_customer
 @app.route('/profile')
 def profile():
 
@@ -132,7 +146,6 @@ def profile():
         'profile.html',
         customer=customer
     )
-
 
 # ---------------- ACCOUNT ----------------
 
