@@ -1,253 +1,355 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Fund Transfer</title>
+    <title>Transfer | ABC Bank</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-<style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
 
-body{
-background:#f5f7fa;
-}
+        .navbar {
+            background: linear-gradient(135deg, #0b1f3a, #123e70);
+            color: white;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-.navbar{
-background:#1f3b5b;
-}
+        .brand {
+            font-size: 24px;
+            font-weight: bold;
+        }
 
-.card{
-border-radius:15px;
-border:none;
-}
+        .dashboard {
+            color: white;
+            text-decoration: none;
+            padding: 9px 16px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.12);
+        }
 
-.btn-bank{
-background:#1f3b5b;
-color:white;
-}
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
 
-</style>
+        h1 {
+            color: #123e70;
+            margin-bottom: 8px;
+        }
 
+        .subtitle {
+            color: #7b8794;
+            margin-bottom: 25px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.07);
+        }
+
+        .card h2 {
+            color: #123e70;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d7dee8;
+            border-radius: 8px;
+            margin-bottom: 17px;
+            font-size: 14px;
+        }
+
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #123e70;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0b315b;
+        }
+
+        .error {
+            background: #ffeaea;
+            color: #b42323;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-size: 13px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f5f8fc;
+            color: #526174;
+            font-size: 12px;
+            text-align: left;
+            padding: 13px;
+        }
+
+        td {
+            padding: 14px 13px;
+            border-bottom: 1px solid #edf0f4;
+            font-size: 13px;
+        }
+
+        .amount {
+            font-weight: bold;
+            color: #1761a8;
+        }
+
+        .status {
+            background: #e8f7ef;
+            color: #16704b;
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 45px 10px;
+            color: #8995a5;
+        }
+
+        @media (max-width: 800px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                margin-top: 25px;
+            }
+        }
+    </style>
 </head>
-
 
 <body>
 
+<nav class="navbar">
 
-<nav class="navbar navbar-dark">
+    <div class="brand">
+        ABC Bank
+    </div>
 
-<div class="container">
-
-<a class="navbar-brand fw-bold">
-🏦 ABC Bank
-</a>
-
-<a href="/customer_dashboard" class="btn btn-light btn-sm">
-Dashboard
-</a>
-
-</div>
+    <a href="/customer_dashboard" class="dashboard">
+        ← Dashboard
+    </a>
 
 </nav>
 
 
+<div class="container">
 
-<div class="container mt-5">
+    <h1>Money Transfer</h1>
 
-
-<h2>
-Fund Transfer
-</h2>
-
-
-<div class="card shadow mt-4">
-
-<div class="card-body">
+    <p class="subtitle">
+        Transfer money securely to your beneficiary.
+    </p>
 
 
-<form method="POST" action="/transfer">
+    <div class="grid">
+
+        <!-- TRANSFER FORM -->
+
+        <div class="card">
+
+            <h2>Make a Transfer</h2>
+
+            {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/transfer">
+
+                <label>Beneficiary</label>
+
+                <select name="beneficiary" required>
+
+                    <option value="">Select Beneficiary</option>
+
+                    {% for b in beneficiaries %}
+
+                    <option value="{{ b.beneficiary_id }}">
+                        {{ b.name }} - {{ b.account_number }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
 
 
-<label>
-Select Beneficiary
-</label>
+                <label>Transfer Type</label>
+
+                <select name="transfer_type" required>
+
+                    <option value="">Select Transfer Type</option>
+
+                    <option value="NEFT">NEFT</option>
+                    <option value="RTGS">RTGS</option>
+                    <option value="IMPS">IMPS</option>
+                    <option value="UPI">UPI</option>
+
+                </select>
 
 
-<select name="beneficiary" class="form-select mb-3" required>
+                <label>Amount</label>
+
+                <input
+                    type="number"
+                    name="amount"
+                    step="0.01"
+                    min="1"
+                    placeholder="Enter amount"
+                    required
+                >
 
 
-<option value="">
-Select Beneficiary
-</option>
+                <label>Remarks</label>
+
+                <textarea
+                    name="remarks"
+                    placeholder="Enter remarks"
+                ></textarea>
 
 
-{% for b in beneficiaries %}
+                <button type="submit">
+                    Transfer Money
+                </button>
 
-<option value="{{b.beneficiary_id}}">
+            </form>
 
-{{b.name}} -
-{{b.account_number}}
-
-</option>
-
-
-{% endfor %}
+        </div>
 
 
-</select>
+        <!-- HISTORY -->
 
+        <div class="card">
 
+            <h2>Transfer History</h2>
 
-<label>
-Transfer Type
-</label>
+            {% if transfers %}
 
-<select name="transfer_type" class="form-select mb-3">
+            <div class="table-container">
 
+                <table>
 
-<option>
-NEFT
-</option>
+                    <thead>
 
-<option>
-RTGS
-</option>
+                        <tr>
+                            <th>Date</th>
+                            <th>Beneficiary</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
 
-<option>
-IMPS
-</option>
+                    </thead>
 
-<option>
-UPI
-</option>
+                    <tbody>
 
+                        {% for t in transfers %}
 
-</select>
+                        <tr>
 
+                            <td>
+                                {{ t.transfer_date }}
+                            </td>
 
+                            <td>
+                                {{ t.beneficiary_name }}
+                            </td>
 
-<label>
-Amount
-</label>
+                            <td class="amount">
+                                ₹ {{ "%.2f"|format(t.amount) }}
+                            </td>
 
-<input 
-type="number"
-name="amount"
-class="form-control mb-3"
-required>
+                            <td>
+                                <span class="status">
+                                    {{ t.status }}
+                                </span>
+                            </td>
 
+                        </tr>
 
+                        {% endfor %}
 
-<label>
-Remarks
-</label>
+                    </tbody>
 
+                </table>
 
-<textarea
-name="remarks"
-class="form-control mb-3">
-</textarea>
+            </div>
 
+            {% else %}
 
+            <div class="empty">
+                No transfers found.
+            </div>
 
-<button class="btn btn-bank w-100">
+            {% endif %}
 
-Transfer Money
+        </div>
 
-</button>
-
-
-</form>
-
+    </div>
 
 </div>
-
-</div>
-
-
-
-
-
-<div class="card shadow mt-4">
-
-
-<div class="card-header">
-
-<h5>
-Transfer History
-</h5>
-
-</div>
-
-
-
-<div class="card-body">
-
-
-<table class="table table-bordered">
-
-
-<tr>
-
-<th>Date</th>
-<th>Beneficiary</th>
-<th>Amount</th>
-<th>Status</th>
-
-</tr>
-
-
-
-{% for t in transfers %}
-
-
-<tr>
-
-<td>
-{{t.transfer_date}}
-</td>
-
-
-<td>
-{{t.beneficiary_name}}
-</td>
-
-
-<td>
-₹ {{t.amount}}
-</td>
-
-
-<td>
-
-<span class="badge bg-success">
-
-{{t.status}}
-
-</span>
-
-</td>
-
-
-</tr>
-
-
-{% endfor %}
-
-
-
-</table>
-
-
-
-</div>
-
-</div>
-
-
-</div>
-
 
 </body>
-
 </html>

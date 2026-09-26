@@ -1,128 +1,518 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Bill Payment</title>
+    <title>Bill Payments | ABC Bank</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body{background:#f5f7fa;}
-.navbar{background:#1f3b5b;}
-.card{border:none;border-radius:15px;}
-.btn-bank{background:#1f3b5b;color:white;}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f4f7fb;
+            color: #172033;
+        }
 
-</style>
+        .navbar {
+            height: 72px;
+            background: linear-gradient(135deg, #0b1f3a, #123e70);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 7%;
+            color: white;
+            box-shadow: 0 5px 20px rgba(11, 31, 58, 0.15);
+        }
 
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: white;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 17px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.25s;
+        }
+
+        .back-btn:hover {
+            background: white;
+            color: #123e70;
+        }
+
+        .container {
+            width: 88%;
+            max-width: 1200px;
+            margin: 42px auto;
+        }
+
+        .page-header {
+            margin-bottom: 28px;
+        }
+
+        .page-header h1 {
+            font-size: 30px;
+            color: #102a4c;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e5ebf3;
+            border-radius: 19px;
+            box-shadow: 0 8px 25px rgba(15, 35, 65, 0.07);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 22px 24px;
+            border-bottom: 1px solid #edf1f6;
+        }
+
+        .card-header h2 {
+            font-size: 18px;
+            color: #123e70;
+            margin-bottom: 5px;
+        }
+
+        .card-header p {
+            font-size: 12px;
+            color: #8995a6;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* ERROR */
+        .error {
+            background: #fff0f0;
+            border: 1px solid #ffd1d1;
+            color: #c0392b;
+            padding: 11px 13px;
+            border-radius: 9px;
+            font-size: 12px;
+            margin-bottom: 18px;
+        }
+
+        /* FORM */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            color: #344054;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            height: 46px;
+            padding: 0 13px;
+            border: 1px solid #d9e0e9;
+            border-radius: 10px;
+            background: #fbfcfe;
+            color: #172033;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #1761a8;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(23, 97, 168, 0.09);
+        }
+
+        .pay-btn {
+            width: 100%;
+            height: 47px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #123e70, #1761a8);
+            color: white;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.25s;
+            margin-top: 3px;
+        }
+
+        .pay-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 9px 20px rgba(18, 62, 112, 0.20);
+        }
+
+        /* HISTORY */
+        .count {
+            float: right;
+            background: #eaf2ff;
+            color: #1761a8;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .history {
+            padding: 5px 24px 20px;
+        }
+
+        .bill-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 17px 0;
+            border-bottom: 1px solid #edf1f6;
+        }
+
+        .bill-item:last-child {
+            border-bottom: none;
+        }
+
+        .bill-icon {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            background: #eaf2ff;
+            color: #1761a8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .bill-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .bill-type {
+            font-size: 14px;
+            font-weight: 700;
+            color: #263449;
+            margin-bottom: 5px;
+        }
+
+        .provider {
+            font-size: 12px;
+            color: #7a8799;
+            margin-bottom: 3px;
+        }
+
+        .date {
+            font-size: 11px;
+            color: #9aa5b4;
+        }
+
+        .bill-amount {
+            font-size: 14px;
+            font-weight: 700;
+            color: #172033;
+            white-space: nowrap;
+        }
+
+        .empty {
+            padding: 45px 20px;
+            text-align: center;
+            color: #8995a6;
+            font-size: 13px;
+        }
+
+        .empty-icon {
+            font-size: 35px;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 850px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 0 5%;
+            }
+
+            .container {
+                width: 92%;
+                margin: 30px auto;
+            }
+
+            .page-header h1 {
+                font-size: 26px;
+            }
+
+            .card-body,
+            .history {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<nav class="navbar navbar-dark">
+<nav class="navbar">
 
-<div class="container">
+    <div class="brand">
+        ABC Bank
+    </div>
 
-<a class="navbar-brand">🏦 ABC Bank</a>
-
-<a href="/customer_dashboard" class="btn btn-light btn-sm">
-Dashboard
-</a>
-
-</div>
+    <a href="{{ url_for('customer_dashboard') }}" class="back-btn">
+        ← Dashboard
+    </a>
 
 </nav>
 
-<div class="container mt-5">
 
-<div class="card shadow">
+<main class="container">
 
-<div class="card-body">
+    <section class="page-header">
 
-<h3>Bill Payment</h3>
+        <h1>Bill Payments</h1>
 
-<form method="POST">
+        <p>
+            Pay your utility bills securely from your bank account.
+        </p>
 
-<label>Bill Type</label>
+    </section>
 
-<select name="bill_type" class="form-select mb-3">
 
-<option>Electricity</option>
-<option>Water</option>
-<option>Gas</option>
-<option>Internet</option>
+    <div class="content-grid">
 
-</select>
+        <!-- PAYMENT FORM -->
+        <section class="card">
 
-<label>Consumer Number</label>
+            <div class="card-header">
 
-<input type="text" class="form-control mb-3" name="consumer_number" required>
+                <h2>💳 Pay a Bill</h2>
 
-<label>Provider</label>
+                <p>
+                    Enter your bill details to make a payment.
+                </p>
 
-<input type="text" class="form-control mb-3" name="provider" required>
+            </div>
 
-<label>Amount</label>
 
-<input type="number" class="form-control mb-3" name="amount" required>
+            <div class="card-body">
 
-<button class="btn btn-bank w-100">
+                {% if error %}
+                <div class="error">
+                    {{ error }}
+                </div>
+                {% endif %}
 
-Pay Bill
 
-</button>
+                <form method="POST">
 
-</form>
+                    <div class="form-group">
 
-</div>
+                        <label for="bill_type">
+                            Bill Type
+                        </label>
 
-</div>
+                        <select id="bill_type" name="bill_type" required>
 
-<div class="card shadow mt-4">
+                            <option value="">Select bill type</option>
+                            <option value="Electricity">Electricity</option>
+                            <option value="Water">Water</option>
+                            <option value="Gas">Gas</option>
+                            <option value="Internet">Internet</option>
 
-<div class="card-header">
+                        </select>
 
-Bill History
+                    </div>
 
-</div>
 
-<div class="card-body">
+                    <div class="form-group">
 
-<table class="table table-bordered">
+                        <label for="consumer_number">
+                            Consumer Number
+                        </label>
 
-<tr>
+                        <input
+                            type="text"
+                            id="consumer_number"
+                            name="consumer_number"
+                            placeholder="Enter consumer number"
+                            required
+                        >
 
-<th>Date</th>
-<th>Bill</th>
-<th>Provider</th>
-<th>Amount</th>
+                    </div>
 
-</tr>
 
-{% for b in bills %}
+                    <div class="form-group">
 
-<tr>
+                        <label for="provider">
+                            Provider
+                        </label>
 
-<td>{{b.payment_date}}</td>
+                        <input
+                            type="text"
+                            id="provider"
+                            name="provider"
+                            placeholder="Enter provider name"
+                            required
+                        >
 
-<td>{{b.bill_type}}</td>
+                    </div>
 
-<td>{{b.provider}}</td>
 
-<td>₹ {{b.amount}}</td>
+                    <div class="form-group">
 
-</tr>
+                        <label for="amount">
+                            Amount
+                        </label>
 
-{% endfor %}
+                        <input
+                            type="number"
+                            id="amount"
+                            name="amount"
+                            placeholder="Enter amount"
+                            min="1"
+                            step="0.01"
+                            required
+                        >
 
-</table>
+                    </div>
 
-</div>
 
-</div>
+                    <button type="submit" class="pay-btn">
+                        Pay Bill
+                    </button>
 
-</div>
+                </form>
+
+            </div>
+
+        </section>
+
+
+        <!-- PAYMENT HISTORY -->
+        <section class="card">
+
+            <div class="card-header">
+
+                <span class="count">
+                    {{ bills|length }}
+                </span>
+
+                <h2>Payment History</h2>
+
+                <p>
+                    Your recent bill payment records.
+                </p>
+
+            </div>
+
+
+            <div class="history">
+
+                {% if bills %}
+
+                    {% for b in bills %}
+
+                    <div class="bill-item">
+
+                        <div class="bill-icon">
+                            {% if b.bill_type == "Electricity" %}
+                                ⚡
+                            {% elif b.bill_type == "Water" %}
+                                💧
+                            {% elif b.bill_type == "Gas" %}
+                                🔥
+                            {% else %}
+                                🌐
+                            {% endif %}
+                        </div>
+
+
+                        <div class="bill-info">
+
+                            <div class="bill-type">
+                                {{ b.bill_type }}
+                            </div>
+
+                            <div class="provider">
+                                {{ b.provider }}
+                            </div>
+
+                            <div class="date">
+                                {{ b.payment_date }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="bill-amount">
+                            ₹ {{ "%.2f"|format(b.amount) }}
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="empty">
+
+                        <div class="empty-icon">
+                            🧾
+                        </div>
+
+                        No bill payments yet.
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
 
 </body>
-
 </html>

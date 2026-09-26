@@ -1,185 +1,517 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Admin Dashboard</title>
+    <title>Admin Dashboard | ABC Bank</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body{
-background:#f5f7fa;
-}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f4f7fb;
+            color: #172033;
+        }
 
-.navbar{
-background:#1f3b5b;
-}
+        /* NAVBAR */
+        .navbar {
+            height: 72px;
+            background: linear-gradient(135deg, #0b1f3a, #123e70);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            color: white;
+            box-shadow: 0 5px 20px rgba(11, 31, 58, 0.15);
+        }
 
-.card{
-border:none;
-border-radius:15px;
-}
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+        }
 
-.metric{
-font-size:28px;
-font-weight:bold;
-color:#1f3b5b;
-}
+        .admin-label {
+            font-size: 13px;
+            opacity: 0.75;
+            margin-right: 15px;
+        }
 
-</style>
+        .logout-btn {
+            text-decoration: none;
+            color: white;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 17px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.25s;
+        }
 
+        .logout-btn:hover {
+            background: white;
+            color: #123e70;
+        }
+
+        /* MAIN */
+        .container {
+            width: 88%;
+            max-width: 1250px;
+            margin: 40px auto;
+        }
+
+        .welcome {
+            margin-bottom: 28px;
+        }
+
+        .welcome h1 {
+            font-size: 31px;
+            color: #102a4c;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: #718096;
+            font-size: 15px;
+        }
+
+        /* STAT CARDS */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e8edf4;
+            border-radius: 18px;
+            padding: 23px;
+            box-shadow: 0 8px 25px rgba(15, 35, 65, 0.06);
+            transition: 0.25s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 30px rgba(15, 35, 65, 0.10);
+        }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 17px;
+        }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: #eaf2ff;
+            color: #1761a8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 21px;
+        }
+
+        .stat-title {
+            font-size: 13px;
+            color: #7a8799;
+            font-weight: 500;
+        }
+
+        .stat-number {
+            font-size: 29px;
+            color: #102a4c;
+            font-weight: 800;
+        }
+
+        /* ACTION SECTION */
+        .section-title {
+            font-size: 20px;
+            font-weight: 750;
+            color: #102a4c;
+            margin-bottom: 17px;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 17px;
+            margin-bottom: 30px;
+        }
+
+        .action-card {
+            text-decoration: none;
+            background: white;
+            border: 1px solid #e8edf4;
+            border-radius: 16px;
+            padding: 22px;
+            color: #172033;
+            transition: 0.25s;
+            box-shadow: 0 7px 20px rgba(15, 35, 65, 0.05);
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            border-color: #bdd3ee;
+            box-shadow: 0 12px 25px rgba(15, 35, 65, 0.09);
+        }
+
+        .action-icon {
+            font-size: 24px;
+            margin-bottom: 13px;
+        }
+
+        .action-card h3 {
+            font-size: 15px;
+            margin-bottom: 5px;
+            color: #123e70;
+        }
+
+        .action-card p {
+            font-size: 12px;
+            color: #7a8799;
+        }
+
+        /* RECENT ACTIVITY */
+        .activity-card {
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e8edf4;
+            box-shadow: 0 8px 25px rgba(15, 35, 65, 0.06);
+            overflow: hidden;
+        }
+
+        .activity-header {
+            padding: 22px 25px;
+            border-bottom: 1px solid #edf1f6;
+        }
+
+        .activity-header h2 {
+            font-size: 19px;
+            color: #102a4c;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 25px;
+            background: #f8fafc;
+            color: #738196;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        td {
+            padding: 17px 25px;
+            border-top: 1px solid #f0f2f5;
+            font-size: 14px;
+            color: #354052;
+        }
+
+        .type {
+            font-weight: 600;
+            color: #123e70;
+        }
+
+        .amount {
+            font-weight: 700;
+            color: #172033;
+        }
+
+        .empty {
+            padding: 30px;
+            text-align: center;
+            color: #8995a6;
+            font-size: 14px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1000px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+            .navbar {
+                padding: 0 5%;
+            }
+
+            .admin-label {
+                display: none;
+            }
+
+            .container {
+                width: 92%;
+                margin: 30px auto;
+            }
+
+            .welcome h1 {
+                font-size: 26px;
+            }
+
+            .stats,
+            .actions {
+                grid-template-columns: 1fr;
+            }
+
+            th,
+            td {
+                padding: 13px 16px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<nav class="navbar navbar-dark">
+<!-- NAVBAR -->
+<nav class="navbar">
 
-<div class="container">
+    <div class="brand">
+        ABC Bank
+    </div>
 
-<a class="navbar-brand">
+    <div>
+        <span class="admin-label">Administrator</span>
 
-🏦 ABC Bank Admin
-
-</a>
-
-<a href="/" class="btn btn-light">
-
-Logout
-
-</a>
-
-</div>
+        <a href="/" class="logout-btn">
+            Logout
+        </a>
+    </div>
 
 </nav>
 
-<div class="container mt-5">
 
-<div class="row">
+<main class="container">
 
-<div class="col-md-3">
+    <!-- WELCOME -->
+    <section class="welcome">
 
-<div class="card shadow p-3 text-center">
+        <h1>Admin Dashboard</h1>
 
-<h6>Total Customers</h6>
+        <p>
+            Monitor customers, transactions, transfers and loan activities.
+        </p>
 
-<div class="metric">
+    </section>
 
-{{ customers }}
 
-</div>
+    <!-- STATISTICS -->
+    <section class="stats">
 
-</div>
+        <div class="stat-card">
 
-</div>
+            <div class="stat-top">
+                <div class="stat-title">Total Customers</div>
+                <div class="stat-icon">👥</div>
+            </div>
 
-<div class="col-md-3">
+            <div class="stat-number">
+                {{ customers }}
+            </div>
 
-<div class="card shadow p-3 text-center">
+        </div>
 
-<h6>Pending Transfers</h6>
 
-<div class="metric">
+        <div class="stat-card">
 
-{{ transfers }}
+            <div class="stat-top">
+                <div class="stat-title">Total Transfers</div>
+                <div class="stat-icon">↔</div>
+            </div>
 
-</div>
+            <div class="stat-number">
+                {{ transfers }}
+            </div>
 
-</div>
+        </div>
 
-</div>
 
-<div class="col-md-3">
+        <div class="stat-card">
 
-<div class="card shadow p-3 text-center">
+            <div class="stat-top">
+                <div class="stat-title">Loan Applications</div>
+                <div class="stat-icon">💳</div>
+            </div>
 
-<h6>Pending Loans</h6>
+            <div class="stat-number">
+                {{ loans }}
+            </div>
 
-<div class="metric">
+        </div>
 
-{{ loans }}
 
-</div>
+        <div class="stat-card">
 
-</div>
+            <div class="stat-top">
+                <div class="stat-title">Transactions</div>
+                <div class="stat-icon">📊</div>
+            </div>
 
-</div>
+            <div class="stat-number">
+                {{ transactions }}
+            </div>
 
-<div class="col-md-3">
+        </div>
 
-<div class="card shadow p-3 text-center">
+    </section>
 
-<h6>Transactions</h6>
 
-<div class="metric">
+    <!-- ADMIN ACTIONS -->
+    <h2 class="section-title">
+        Management
+    </h2>
 
-{{ transactions }}
+    <section class="actions">
 
-</div>
+        <a href="/customers" class="action-card">
 
-</div>
+            <div class="action-icon">👥</div>
 
-</div>
+            <h3>Customers</h3>
 
-</div>
+            <p>
+                View registered customers and account details.
+            </p>
 
-<div class="mt-4">
+        </a>
 
-<a href="/customers" class="btn btn-primary">Customers</a>
 
-<a href="/approve_transfer" class="btn btn-success">Transfers</a>
+        <a href="/approve_transfer" class="action-card">
 
-<a href="/approve_loan" class="btn btn-warning">Loans</a>
+            <div class="action-icon">💸</div>
 
-<a href="/reports" class="btn btn-dark">Reports</a>
+            <h3>Approve Transfers</h3>
 
-</div>
+            <p>
+                Review and manage pending transfers.
+            </p>
 
-<div class="card shadow mt-4">
+        </a>
 
-<div class="card-header">
 
-Recent Activity
+        <a href="/approve_loan" class="action-card">
 
-</div>
+            <div class="action-icon">🏦</div>
 
-<div class="card-body">
+            <h3>Approve Loans</h3>
 
-<table class="table table-striped">
+            <p>
+                Review customer loan applications.
+            </p>
 
-<tr>
+        </a>
 
-<th>Date</th>
 
-<th>Type</th>
+        <a href="/reports" class="action-card">
 
-<th>Amount</th>
+            <div class="action-icon">📈</div>
 
-</tr>
+            <h3>Reports</h3>
 
-{% for a in activities %}
+            <p>
+                View banking statistics and reports.
+            </p>
 
-<tr>
+        </a>
 
-<td>{{a.transaction_date}}</td>
+    </section>
 
-<td>{{a.transaction_type}}</td>
 
-<td>₹ {{a.amount}}</td>
+    <!-- RECENT ACTIVITY -->
+    <section class="activity-card">
 
-</tr>
+        <div class="activity-header">
 
-{% endfor %}
+            <h2>
+                Recent Activities
+            </h2>
 
-</table>
+        </div>
 
-</div>
 
-</div>
+        <div class="table-wrapper">
 
-</div>
+            {% if activities %}
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Transaction Type</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for a in activities %}
+
+                    <tr>
+
+                        <td>
+                            {{ a.transaction_date }}
+                        </td>
+
+                        <td class="type">
+                            {{ a.transaction_type }}
+                        </td>
+
+                        <td class="amount">
+                            ₹ {{ "%.2f"|format(a.amount) }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            {% else %}
+
+            <div class="empty">
+                No recent activities available.
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+</main>
 
 </body>
-
 </html>

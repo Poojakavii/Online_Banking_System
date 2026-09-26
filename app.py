@@ -1,5 +1,14 @@
+from models import (
+    add_transfer,
+    get_transfers,
+    get_beneficiaries,
+    
+)
+
 from flask import Flask, render_template, request, redirect, url_for, session
+
 from models import *
+
 from models import (
     register_customer,
     get_customer,
@@ -21,24 +30,34 @@ from models import (
     get_fd_count,
     get_recent_transactions,
     get_all_customers,
+    get_all_transfers,
     admin_total_customers,
     admin_total_loans,
+    approve_transfer_request,
+    approve_loan_request,
+    get_all_loans,
     admin_total_transactions,
     admin_total_fd
 )
 
 
 app = Flask(__name__)
+
 app.secret_key = "onlinebank123"
 
-# ---------------- HOME ----------------
+
+# =====================================================
+# HOME
+# =====================================================
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
 
-# ---------------- REGISTER ----------------
+# =====================================================
+# REGISTER
+# =====================================================
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -54,35 +73,34 @@ def register():
         gender = request.form['gender']
         account_type = request.form['account_type']
 
-    try:
+        bank_name = request.form['bank_name']
+        account_number = request.form['account_number']
+        ifsc = request.form['ifsc']
+        balance = request.form['balance']
 
-       register_customer(
-        name,
-        email,
-        phone,
-        password,
-        address,
-        dob,
-        gender,
-        account_type,
-        bank_name,
-        account_number,
-        ifsc,
-        balance
-    )
-
-    except Exception as e:
-
-        if "Duplicate entry" in str(e):
-
-          return render_template(
-            "register.html",
-            error="Email already registered. Please use another email."
+        register_customer(
+            name,
+            email,
+            phone,
+            password,
+            address,
+            dob,
+            gender,
+            account_type,
+            bank_name,
+            account_number,
+            ifsc,
+            balance
         )
 
-    else:
-        raise
-# ---------------- LOGIN ----------------
+        return redirect(url_for('customer_login'))
+
+    return render_template("register.html")
+
+
+# =====================================================
+# CUSTOMER LOGIN
+# =====================================================
 
 @app.route('/customer_login', methods=['GET', 'POST'])
 def customer_login():
@@ -101,53 +119,112 @@ def customer_login():
             return redirect(url_for('customer_dashboard'))
 
         else:
+
             return "Invalid Email or Password"
 
     return render_template('customer_login.html')
-# ---------------- DASHBOARD ----------------
-@app.route('/customer_dashboard')
+
+
+# =====================================================
+# CUSTOMER DASHBOARD
+# =====================================================
+
+@app.route("/customer_dashboard")
 def customer_dashboard():
 
-    customer_id = session['customer_id']
+    if "customer_id" not in session:
+        return redirect(url_for("customer_login"))
+
+    customer_id = session["customer_id"]
 
     customer = get_customer(customer_id)
 
-    transaction_count = get_transaction_count(customer_id)
-
-    loan_count = get_loan_count(customer_id)
-
-    fd_count = get_fd_count(customer_id)
-
-    transactions = get_recent_transactions(customer_id)
-
+    transactions = get_transactions(customer_id)
+    loans = get_loans(customer_id)
+    fixed_deposits = get_fixed_deposits(customer_id)
 
     return render_template(
-        'customer_dashboard.html',
+        "customer_dashboard.html",
         customer=customer,
-        transaction_count=transaction_count,
-        loan_count=loan_count,
-        fd_count=fd_count,
-        transactions=transactions
+        transactions=transactions,
+        loans=loans,
+        fixed_deposits=fixed_deposits
     )
 
-# ---------------- PROFILE ----------------
 
-# ---------------- PROFILE ----------------
-from models import update_customer
-@app.route('/profile')
+# =====================================================
+# PROFILE
+# =====================================================
+
+@app.route('/profile', methods=['GET', 'POST'])
 def profile():
 
     if 'customer_id' not in session:
         return redirect(url_for('customer_login'))
 
-    customer = get_customer(session['customer_id'])
+    customer_id = session['customer_id']
+
+    if request.method == "POST":
+
+        update_customer(
+            customer_id,
+            request.form['name'],
+            request.form['email'],
+            request.form['phone'],
+            request.form['gender'],
+            request.form['address']
+        )
+
+        return redirect(url_for('profile'))
+
+    customer = get_customer(customer_id)
 
     return render_template(
         'profile.html',
         customer=customer
     )
 
-# ---------------- ACCOUNT ----------------
+
+# =====================================================
+# CHANGE PASSWORD
+# =====================================================
+
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+
+    if 'customer_id' not in session:
+        return redirect(url_for('customer_login'))
+
+    customer = get_customer(session['customer_id'])
+
+    if request.method == 'POST':
+
+        new_password = request.form.get('password')
+
+        if not new_password:
+
+            return render_template(
+                'change_password.html',
+                customer=customer,
+                error="Please enter a new password."
+            )
+
+        update_password(
+            session['customer_id'],
+            new_password
+        )
+
+        return redirect(url_for('customer_dashboard'))
+
+    return render_template(
+        'change_password.html',
+        customer=customer
+    )
+
+
+# =====================================================
+# ACCOUNT
+# =====================================================
 
 @app.route('/account')
 def account():
@@ -162,7 +239,10 @@ def account():
         customer=customer
     )
 
-# ---------------- TRANSFER ----------------
+
+# =====================================================
+# TRANSFER
+# =====================================================
 
 @app.route('/transfer', methods=['GET', 'POST'])
 def transfer():
@@ -170,35 +250,41 @@ def transfer():
     if 'customer_id' not in session:
         return redirect(url_for('customer_login'))
 
-    customer = get_customer(session['customer_id'])
+    customer_id = session['customer_id']
 
-    beneficiaries = get_beneficiaries(session['customer_id'])
+    customer = get_customer(customer_id)
 
-    if request.method == "POST":
+    beneficiaries = get_beneficiaries(customer_id)
 
-        beneficiary_id = request.form['beneficiary']
-        transfer_type = request.form['transfer_type']
-        amount = request.form['amount']
-        remarks = request.form['remarks']
+    if request.method == 'POST':
 
-        add_transfer(
-            session['customer_id'],
+        beneficiary_id = request.form.get('beneficiary')
+        transfer_type = request.form.get('transfer_type')
+        amount = request.form.get('amount')
+        remarks = request.form.get('remarks', '')
+
+        success, message = add_transfer(
+            customer_id,
             beneficiary_id,
             transfer_type,
             amount,
             remarks
         )
-        
-        add_transaction(
-            session['customer_id'],
-            "Fund Transfer",
-            amount,
-            "Pending"
-        )
-        
-        return redirect(url_for('transfer'))
 
-    transfers = get_transfers(session['customer_id'])
+        if success:
+            return redirect(url_for('transfer'))
+
+        transfers = get_transfers(customer_id)
+
+        return render_template(
+            'transfer.html',
+            customer=get_customer(customer_id),
+            beneficiaries=get_beneficiaries(customer_id),
+            transfers=transfers,
+            error=message
+        )
+
+    transfers = get_transfers(customer_id)
 
     return render_template(
         'transfer.html',
@@ -207,10 +293,10 @@ def transfer():
         transfers=transfers
     )
 
-# ---------------- BENEFICIARY ----------------
 
-from models import add_beneficiary, get_beneficiaries
-
+# =====================================================
+# BENEFICIARY
+# =====================================================
 
 @app.route('/beneficiary', methods=['GET', 'POST'])
 def beneficiary():
@@ -239,22 +325,19 @@ def beneficiary():
         customer=customer,
         beneficiaries=beneficiaries
     )
-# ---------------- BILL PAYMENT ----------------
 
 
+# =====================================================
+# BILL PAYMENT
+# =====================================================
 
-# ---------------- BILL PAYMENT ----------------
-
-    # ---------------- BILL PAYMENT ----------------
-
-@app.route('/billpayment', methods=['GET','POST'])
+@app.route('/billpayment', methods=['GET', 'POST'])
 def billpayment():
 
     if 'customer_id' not in session:
         return redirect(url_for('customer_login'))
 
     customer_id = session['customer_id']
-
 
     if request.method == "POST":
 
@@ -263,10 +346,7 @@ def billpayment():
         provider = request.form['provider']
         amount = request.form['amount']
 
-
-        from models import add_bill_payment
-
-        add_bill_payment(
+        success, message = add_bill_payment(
             customer_id,
             bill_type,
             consumer_number,
@@ -274,23 +354,35 @@ def billpayment():
             amount
         )
 
+        if not success:
+
+            customer = get_customer(customer_id)
+            bills = get_bill_payments(customer_id)
+
+            return render_template(
+                "billpayment.html",
+                customer=customer,
+                bills=bills,
+                error=message
+            )
 
         return redirect(url_for('billpayment'))
 
-
-
-    from models import get_bill_payments
-
+    customer = get_customer(customer_id)
     bills = get_bill_payments(customer_id)
 
-
     return render_template(
-        'billpayment.html',
+        "billpayment.html",
+        customer=customer,
         bills=bills
     )
-# ---------------- FIXED DEPOSIT ----------------
 
-@app.route('/fixeddeposit', methods=['GET','POST'])
+
+# =====================================================
+# FIXED DEPOSIT
+# =====================================================
+
+@app.route('/fixeddeposit', methods=['GET', 'POST'])
 def fixeddeposit():
 
     if 'customer_id' not in session:
@@ -311,14 +403,7 @@ def fixeddeposit():
             tenure,
             interest
         )
-        
-        add_transaction(
-            session['customer_id'],
-            "Fixed Deposit",
-            amount,
-            "Completed"
-        )
-        
+
         return redirect(url_for('fixeddeposit'))
 
     fds = get_fixed_deposits(session['customer_id'])
@@ -329,7 +414,10 @@ def fixeddeposit():
         fds=fds
     )
 
-# ---------------- LOAN ----------------
+
+# =====================================================
+# LOAN
+# =====================================================
 
 @app.route('/loan', methods=['GET', 'POST'])
 def loan():
@@ -355,14 +443,14 @@ def loan():
             income,
             purpose
         )
-        
+
         add_transaction(
             session['customer_id'],
             "Loan Application",
             amount,
             "Pending"
         )
-        
+
         return redirect(url_for('loan'))
 
     loans = get_loans(session['customer_id'])
@@ -372,7 +460,11 @@ def loan():
         customer=customer,
         loans=loans
     )
-# ---------------- TRANSACTION ----------------
+
+
+# =====================================================
+# TRANSACTION
+# =====================================================
 
 @app.route('/transaction')
 def transaction():
@@ -389,39 +481,152 @@ def transaction():
         customer=customer,
         transactions=transactions
     )
-# ---------------- ADMIN ----------------
 
-@app.route('/admin_login')
+
+# =====================================================
+# ADMIN LOGIN
+# =====================================================
+
+@app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
+
+    if request.method == 'POST':
+
+        admin_id = request.form.get('admin_id')
+        password = request.form.get('password')
+
+        if admin_id == 'ADM1234' and password == '1234':
+
+            session['admin_logged_in'] = True
+
+            return redirect(url_for('admin_dashboard'))
+
+        return render_template(
+            'admin_login.html',
+            error='Invalid Admin ID or Password'
+        )
+
     return render_template('admin_login.html')
 
 
+# =====================================================
+# ADMIN DASHBOARD
+# =====================================================
+
 @app.route('/admin_dashboard')
 def admin_dashboard():
-    return render_template('admin_dashboard.html')
 
+    return render_template(
+        'admin_dashboard.html'
+    )
+
+# =====================================================
+# ADMIN - CUSTOMERS
+# =====================================================
 
 @app.route('/customers')
 def customers():
-    return render_template('customers.html')
 
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+
+    customers = get_all_customers()
+
+    return render_template(
+        'customers.html',
+        customers=customers
+    )
+
+
+# =====================================================
+# ADMIN - APPROVE TRANSFER
+# =====================================================
 
 @app.route('/approve_transfer')
 def approve_transfer():
-    return render_template('approve_transfer.html')
 
+    transfers = get_all_transfers()
+
+    return render_template(
+        'approve_transfer.html',
+        transfers=transfers
+    )
+
+# =====================================================
+# ADMIN - APPROVE INDIVIDUAL TRANSFER
+# =====================================================
+
+@app.route('/approve_transfer/<int:transfer_id>')
+def approve_transfer_action(transfer_id):
+
+    approve_transfer_request(transfer_id)
+
+    return redirect(url_for('approve_transfer'))
+
+
+# =====================================================
+# ADMIN - APPROVE LOAN
+# =====================================================
 
 @app.route('/approve_loan')
 def approve_loan():
-    return render_template('approve_loan.html')
+
+    loans = get_all_loans()
+
+    return render_template(
+        'approve_loan.html',
+        loans=loans
+    )
+# =====================================================
+# ADMIN - APPROVE INDIVIDUAL LOAN
+# =====================================================
+
+@app.route('/approve_loan/<int:loan_id>')
+def approve_loan_action(loan_id):
+
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+
+    approve_loan_request(loan_id)
+
+    return redirect(url_for('approve_loan'))
 
 
+# =====================================================
+# ADMIN - REPORTS
+# =====================================================
 @app.route('/reports')
 def reports():
-    return render_template('reports.html')
+
+    customers = get_all_customers()
+
+    report = {
+        'customers': len(customers),
+        'loans': 0,
+        'transfers': 0,
+        'fds': 0,
+        'bills': 0,
+        'balance': 0
+    }
+    return render_template(
+        'reports.html',
+        report=report
+    )
+# =====================================================
+# ADMIN LOGOUT
+# =====================================================
+
+@app.route('/admin_logout')
+def admin_logout():
+
+    session.pop('admin_logged_in', None)
+
+    return redirect(url_for('admin_login'))
 
 
-# ---------------- LOGOUT ----------------
+# =====================================================
+# CUSTOMER LOGOUT
+# =====================================================
 
 @app.route('/logout')
 def logout():
@@ -431,7 +636,9 @@ def logout():
     return redirect(url_for('customer_login'))
 
 
-# ---------------- RUN ----------------
+# =====================================================
+# RUN
+# =====================================================
 
 if __name__ == "__main__":
     app.run(debug=True)

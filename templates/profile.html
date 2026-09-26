@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Profile | ABC Bank</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f7fb;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #26364a;
+        }
+
+        /* NAVBAR */
+
+        .navbar {
+            background: linear-gradient(135deg, #162d4a, #234d73);
+            padding: 14px 0;
+        }
+
+        .navbar-brand {
+            font-size: 21px;
+            letter-spacing: .3px;
+        }
+
+        .dashboard-btn {
+            border-radius: 9px;
+            font-weight: 600;
+            padding: 8px 18px;
+        }
+
+        /* PAGE */
+
+        .profile-container {
+            max-width: 1050px;
+            margin: 40px auto;
+        }
+
+        /* PROFILE HEADER */
+
+        .profile-header {
+            background: linear-gradient(135deg, #1f4164, #32688f);
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(31, 59, 91, .15);
+        }
+
+        .profile-header::after {
+            content: "";
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+            right: -70px;
+            top: -90px;
+        }
+
+        .profile-header-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: white;
+            padding: 5px;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            margin: 0;
+            font-size: 29px;
+            font-weight: 700;
+        }
+
+        .profile-email {
+            margin-top: 5px;
+            opacity: .85;
+        }
+
+        .customer-badge {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(255,255,255,.14);
+            font-size: 13px;
+        }
+
+        /* CARDS */
+
+        .section-card {
+            background: white;
+            border: none;
+            border-radius: 18px;
+            padding: 25px;
+            height: 100%;
+            box-shadow: 0 5px 22px rgba(31, 59, 91, .07);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 22px;
+            color: #1f3b5b;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        /* INFORMATION */
+
+        .info-item {
+            padding: 13px 0;
+            border-bottom: 1px solid #edf0f4;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #7b8794;
+            margin-bottom: 3px;
+        }
+
+        .info-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #26364a;
+            word-break: break-word;
+        }
+
+        /* BALANCE */
+
+        .balance-card {
+            background: linear-gradient(135deg, #1f3b5b, #2d6289);
+            color: white;
+            border-radius: 18px;
+            padding: 25px;
+            height: 100%;
+            box-shadow: 0 8px 25px rgba(31, 59, 91, .16);
+        }
+
+        .balance-label {
+            font-size: 13px;
+            opacity: .8;
+        }
+
+        .balance {
+            font-size: 31px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .account-number {
+            margin-top: 25px;
+            font-size: 14px;
+            opacity: .85;
+            letter-spacing: 1px;
+        }
+
+        /* SECURITY */
+
+        .password-box {
+            background: #f8fafc;
+            border-radius: 13px;
+            padding: 18px;
+            border: 1px solid #e9edf2;
+        }
+
+        .form-control {
+            border-radius: 9px;
+            padding: 11px 13px;
+            border: 1px solid #dce2e8;
+        }
+
+        .form-control:focus {
+            border-color: #32688f;
+            box-shadow: 0 0 0 3px rgba(50,104,143,.1);
+        }
+
+        .btn-bank {
+            background: #1f3b5b;
+            color: white;
+            border: none;
+            border-radius: 9px;
+            padding: 10px 18px;
+            font-weight: 600;
+        }
+
+        .btn-bank:hover {
+            background: #294d73;
+            color: white;
+        }
+
+        /* STATUS */
+
+        .security-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f1f8f4;
+            color: #23734d;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #2ca66f;
+        }
+
+        /* FOOTER */
+
+        footer {
+            background: #162d4a;
+            color: #dce5ed;
+            margin-top: 50px;
+            padding: 20px;
+            font-size: 13px;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 768px) {
+
+            .profile-container {
+                margin: 25px 15px;
+            }
+
+            .profile-header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-name {
+                font-size: 24px;
+            }
+
+            .section-card,
+            .balance-card {
+                margin-bottom: 15px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- NAVBAR -->
+
+<nav class="navbar navbar-dark">
+
+    <div class="container">
+
+        <a class="navbar-brand fw-bold">
+            🏦 ABC Bank
+        </a>
+
+        <a href="/customer_dashboard"
+           class="btn btn-light dashboard-btn">
+            ← Dashboard
+        </a>
+
+    </div>
+
+</nav>
+
+
+
+<div class="container profile-container">
+
+
+    <!-- PROFILE HEADER -->
+
+    <div class="profile-header mb-4">
+
+        <div class="profile-header-content">
+
+            <img
+                src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                class="profile-img"
+                alt="Profile">
+
+            <div>
+
+                <h1 class="profile-name">
+                    {{ customer.name }}
+                </h1>
+
+                <div class="profile-email">
+                    {{ customer.email }}
+                </div>
+
+                <div class="customer-badge">
+                    Customer ID: {{ customer.customer_id }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="row g-4">
+
+
+        <!-- PERSONAL DETAILS -->
+
+        <div class="col-lg-7">
+
+            <div class="section-card">
+
+                <div class="section-title">
+                    👤 Personal Information
+                </div>
+
+
+                <div class="row">
+
+
+                    <div class="col-md-6">
+
+                        <div class="info-item">
+
+                            <div class="info-label">
+                                Full Name
+                            </div>
+
+                            <div class="info-value">
+                                {{ customer.name }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="info-item">
+
+                            <div class="info-label">
+                                Email Address
+                            </div>
+
+                            <div class="info-value">
+                                {{ customer.email }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="info-item">
+
+                            <div class="info-label">
+                                Phone Number
+                            </div>
+
+                            <div class="info-value">
+                                {{ customer.phone }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="info-item">
+
+                            <div class="info-label">
+                                Date of Birth
+                            </div>
+
+                            <div class="info-value">
+                                {{ customer.dob }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="info-item">
+
+                            <div class="info-label">
+                                Gender
+                            </div>
+
+                            <div class="info-value">
+                                {{ customer.gender }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="info-item">
+
+                            <div class="info-label">
+                                Address
+                            </div>
+
+                            <div class="info-value">
+                                {{ customer.address }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ACCOUNT SUMMARY -->
+
+        <div class="col-lg-5">
+
+            <div class="balance-card">
+
+                <div class="balance-label">
+                    Available Balance
+                </div>
+
+                <div class="balance">
+                    ₹ {{ "%.2f"|format(customer.balance|float) }}
+                </div>
+
+                <div class="account-number">
+                    Account Number
+                    <br>
+
+                    •••• •••• {{ customer.account_number[-4:] }}
+                </div>
+
+                <hr style="opacity:.2;">
+
+                <div class="mt-3">
+
+                    <small style="opacity:.7;">
+                        Account Type
+                    </small>
+
+                    <div class="fw-bold mt-1">
+                        {{ customer.account_type }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- BANK DETAILS -->
+
+        <div class="col-lg-7">
+
+            <div class="section-card">
+
+                <div class="section-title">
+                    🏦 Bank Account Details
+                </div>
+
+
+                <div class="row">
+
+
+                    <div class="col-md-6">
+
+                        <div class="info-item">
+
+                            <div class="info-label">
+                                Bank Name
+                            </div>
+
+                            <div class="info-value">
+                                {{ customer.bank_name }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="info-item">
+
+                            <div class="info-label">
+                                Account Type
+                            </div>
+
+                            <div class="info-value">
+                                {{ customer.account_type }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="info-item">
+
+                            <div class="info-label">
+                                Account Number
+                            </div>
+
+                            <div class="info-value">
+                                {{ customer.account_number }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="info-item">
+
+                            <div class="info-label">
+                                IFSC Code
+                            </div>
+
+                            <div class="info-value">
+                                {{ customer.ifsc }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- SECURITY -->
+
+        <div class="col-lg-5">
+
+            <div class="section-card">
+
+                <div class="section-title">
+                    🔐 Account Security
+                </div>
+
+
+                <div class="security-status">
+
+                    <span class="status-dot"></span>
+
+                    Your account is protected
+
+                </div>
+
+
+                <div class="password-box">
+
+                    <div class="fw-bold mb-1">
+                        Change Password
+                    </div>
+
+                    <div class="text-muted small mb-3">
+                        Update your banking password regularly.
+                    </div>
+
+
+                    <form method="POST"
+                          action="/change_password">
+
+
+                        <input
+                            type="password"
+                            name="password"
+                            class="form-control mb-3"
+                            placeholder="Enter new password"
+                            required>
+
+
+                        <button
+                            type="submit"
+                            class="btn btn-bank w-100">
+
+                            🔒 Change Password
+
+                        </button>
+
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<footer class="text-center">
+
+    © 2026 ABC Bank
+    <br>
+
+    Secure Digital Banking
+
+</footer>
+
+
+</body>
+
+</html>

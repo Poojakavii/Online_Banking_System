@@ -1,5 +1,28 @@
 import mysql.connector
 
+# ---------------- CHANGE PASSWORD ----------------
+
+def update_password(customer_id, new_password):
+
+    conn = get_db_connection()
+
+    cursor = conn.cursor()
+
+
+    cursor.execute("""
+    UPDATE customers
+    SET password=%s
+    WHERE customer_id=%s
+    """,
+    (
+        new_password,
+        customer_id
+    ))
+
+
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 # ---------------- DATABASE CONNECTION ----------------
 
@@ -8,42 +31,104 @@ def get_db_connection():
         host="localhost",
         user="root",
         password="",
-        database="online_banking_system"
+        database="online_banking_clean"
     )
 
 
 # ---------------- REGISTER CUSTOMER ----------------
 
-def register_customer(name, email, phone, password, address, dob, gender, account_type):
+# ---------------- REGISTER CUSTOMER ----------------
+
+# ---------------- REGISTER CUSTOMER ----------------
+
+def register_customer(
+    name,
+    email,
+    phone,
+    password,
+    address,
+    dob,
+    gender,
+    account_type,
+    bank_name,
+    account_number,
+    ifsc,
+    balance
+):
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    sql = """
-    INSERT INTO customers
-    (name,email,phone,password,address,dob,gender,account_type)
-    VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-    """
+    try:
 
-    values = (
-        name,
-        email,
-        phone,
-        password,
-        address,
-        dob,
-        gender,
-        account_type
-    )
+        # Check duplicate email
+        cursor.execute("""
+            SELECT customer_id
+            FROM customers
+            WHERE email=%s
+        """, (email,))
 
-    cursor.execute(sql, values)
+        if cursor.fetchone():
+            return False, "Email already registered"
 
-    conn.commit()
+        # Check duplicate account number
+        cursor.execute("""
+            SELECT customer_id
+            FROM customers
+            WHERE account_number=%s
+        """, (account_number,))
 
-    cursor.close()
-    conn.close()
+        if cursor.fetchone():
+            return False, "Account number already exists"
 
+        # Insert customer
+        cursor.execute("""
+            INSERT INTO customers
+            (
+                name,
+                email,
+                phone,
+                password,
+                address,
+                dob,
+                gender,
+                account_type,
+                bank_name,
+                account_number,
+                ifsc,
+                balance
+            )
+            VALUES
+            (
+                %s,%s,%s,%s,%s,%s,
+                %s,%s,%s,%s,%s,%s
+            )
+        """, (
+            name,
+            email,
+            phone,
+            password,
+            address,
+            dob,
+            gender,
+            account_type,
+            bank_name,
+            account_number,
+            ifsc,
+            balance
+        ))
 
+        conn.commit()
+
+        return True, "Registration successful"
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()
 # ---------------- CUSTOMER LOGIN ----------------
 
 def check_login(email, password):
@@ -127,178 +212,218 @@ def get_beneficiaries(customer_id):
     conn.close()
 
     return data
-# ---------------- FUND TRANSFER ----------------
 
+
+# ================= BILL PAYMENT =================
+def add_bill_payment(
+    customer_id,
+    bill_type,
+    consumer_number,
+    provider,
+    amount
+):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        amount = float(amount)
+
+        # Check customer balance
+        cursor.execute("""
+            SELECT balance
+            FROM customers
+            WHERE customer_id = %s
+        """, (customer_id,))
+
+        customer = cursor.fetchone()
+
+        if customer is None:
+            return False, "Customer not found"
+
+        if float(customer["balance"]) < amount:
+            return False, "Insufficient balance"
+
+        # Deduct balance
+        cursor.execute("""
+            UPDATE customers
+            SET balance = balance - %s
+            WHERE customer_id = %s
+        """, (amount, customer_id))
+
+        # Save bill payment
+        cursor.execute("""
+            INSERT INTO bill_payments
+            (
+                customer_id,
+                bill_type,
+                consumer_number,
+                provider,
+                amount,
+                status
+            )
+            VALUES
+            (%s, %s, %s, %s, %s, 'Paid')
+        """, (
+            customer_id,
+            bill_type,
+            consumer_number,
+            provider,
+            amount
+        ))
+
+        # Save transaction
+        cursor.execute("""
+            INSERT INTO transactions
+            (
+                customer_id,
+                transaction_type,
+                amount,
+                status
+            )
+            VALUES
+            (%s, %s, %s, %s)
+        """, (
+            customer_id,
+            "Bill Payment",
+            amount,
+            "Completed"
+        ))
+
+        conn.commit()
+
+        return True, "Bill payment successful"
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()
+
+# ---------------- FUND TRANSFER ----------------
 def add_transfer(customer_id, beneficiary_id, transfer_type, amount, remarks):
 
     conn = get_db_connection()
-    cursor = conn.cursor()
-
-    sql = """
-    INSERT INTO transfers
-    (customer_id, beneficiary_id, transfer_type, amount, remarks)
-    VALUES (%s,%s,%s,%s,%s)
-    """
-
-    cursor.execute(sql, (
-        customer_id,
-        beneficiary_id,
-        transfer_type,
-        amount,
-        remarks
-    ))
-
-    # Also add transaction history
-    sql2 = """
-    INSERT INTO transactions
-    (customer_id, transaction_type, amount, status)
-    VALUES (%s,%s,%s,%s)
-    """
-
-    cursor.execute(sql2, (
-        customer_id,
-        "Fund Transfer",
-        amount,
-        "Completed"
-    ))
-
-    conn.commit()
-
-    cursor.close()
-    conn.close()
-
-
-def get_transfers(customer_id):
-
-    conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    sql = """
-    SELECT
-        t.transfer_id,
-        b.name,
-        t.transfer_type,
-        t.amount,
-        t.status,
-        t.transfer_date
+    try:
+        amount = float(amount)
 
-    FROM transfers t
+        if amount <= 0:
+            return False, "Enter a valid amount."
 
-    JOIN beneficiaries b
+        # Get sender
+        cursor.execute("""
+            SELECT *
+            FROM customers
+            WHERE customer_id = %s
+        """, (customer_id,))
 
-    ON t.beneficiary_id=b.beneficiary_id
+        sender = cursor.fetchone()
 
-    WHERE t.customer_id=%s
+        if sender is None:
+            return False, "Customer account not found."
 
-    ORDER BY t.transfer_id DESC
-    """
+        # Check balance
+        if float(sender["balance"]) < amount:
+            return False, "Insufficient balance."
 
-    cursor.execute(sql, (customer_id,))
+        # Get beneficiary
+        cursor.execute("""
+            SELECT *
+            FROM beneficiaries
+            WHERE beneficiary_id = %s
+              AND customer_id = %s
+        """, (beneficiary_id, customer_id))
 
-    data = cursor.fetchall()
+        beneficiary = cursor.fetchone()
 
-    cursor.close()
-    conn.close()
+        if beneficiary is None:
+            return False, "Beneficiary not found."
 
-    return data
-# ---------------- FUND TRANSFER ----------------
+        # Check whether beneficiary is an account inside this bank
+        cursor.execute("""
+            SELECT customer_id
+            FROM customers
+            WHERE account_number = %s
+        """, (beneficiary["account_number"],))
 
-def add_transfer(customer_id, beneficiary_id, transfer_type, amount, remarks):
+        receiver = cursor.fetchone()
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
+        # Deduct money from sender
+        cursor.execute("""
+            UPDATE customers
+            SET balance = balance - %s
+            WHERE customer_id = %s
+        """, (amount, customer_id))
 
-    sql = """
-    INSERT INTO transfers
-    (customer_id, beneficiary_id, transfer_type, amount, remarks)
-    VALUES (%s,%s,%s,%s,%s)
-    """
+        # If receiver exists, credit receiver
+        # If external account, money is simply recorded as an external transfer
+        if receiver is not None:
 
-    cursor.execute(sql, (
-        customer_id,
-        beneficiary_id,
-        transfer_type,
-        amount,
-        remarks
-    ))
+            cursor.execute("""
+                UPDATE customers
+                SET balance = balance + %s
+                WHERE customer_id = %s
+            """, (amount, receiver["customer_id"]))
 
-    conn.commit()
+        # Save transfer
+        cursor.execute("""
+            INSERT INTO transfers
+            (
+                customer_id,
+                beneficiary_id,
+                transfer_type,
+                amount,
+                remarks,
+                status
+            )
+            VALUES
+            (%s, %s, %s, %s, %s, %s)
+        """, (
+            customer_id,
+            beneficiary_id,
+            transfer_type,
+            amount,
+            remarks,
+            "Completed"
+        ))
 
-    cursor.close()
-    conn.close()
+        # Save transaction
+        cursor.execute("""
+            INSERT INTO transactions
+            (
+                customer_id,
+                transaction_type,
+                amount,
+                status
+            )
+            VALUES
+            (%s, %s, %s, %s)
+        """, (
+            customer_id,
+            "Fund Transfer",
+            amount,
+            "Completed"
+        ))
 
+        conn.commit()
 
-def get_transfers(customer_id):
+        return True, "Transfer successful."
 
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    except Exception as e:
 
-    sql = """
-    SELECT
-        t.*,
-        b.name
-    FROM transfers t
-    JOIN beneficiaries b
-    ON t.beneficiary_id=b.beneficiary_id
-    WHERE t.customer_id=%s
-    ORDER BY transfer_id DESC
-    """
+        conn.rollback()
 
-    cursor.execute(sql, (customer_id,))
+        print("TRANSFER ERROR:", e)
 
-    data = cursor.fetchall()
+        return False, "Transfer failed."
 
-    cursor.close()
-    conn.close()
+    finally:
 
-    return data
-# ---------------- BILL PAYMENT ----------------
-
-def add_bill_payment(customer_id, bill_type, consumer_number, provider, amount):
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    sql = """
-    INSERT INTO bill_payments
-    (customer_id, bill_type, provider, amount)
-    VALUES (%s,%s,%s,%s)
-    """
-
-    cursor.execute(sql, (
-        customer_id,
-        bill_type,
-        provider,
-        amount
-    ))
-
-    conn.commit()
-
-    cursor.close()
-    conn.close()
-
-
-def get_bill_payments(customer_id):
-
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute(
-        """
-        SELECT *
-        FROM bill_payments
-        WHERE customer_id=%s
-        ORDER BY bill_id DESC
-        """,
-        (customer_id,)
-    )
-
-    data = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return data
+        cursor.close()
+        conn.close()
 # ---------------- LOANS ----------------
 
 def add_loan(customer_id, loan_type, amount, tenure, income, purpose):
@@ -439,143 +564,9 @@ def get_transactions(customer_id):
     conn.close()
 
     return data
-# ---------------- BILL PAYMENT ----------------
-
-def add_bill_payment(customer_id, bill_type, provider, amount):
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    sql = """
-    INSERT INTO bill_payments
-    (customer_id, bill_type, provider, amount, status)
-    VALUES (%s,%s,%s,%s,%s)
-    """
-
-    cursor.execute(sql,(
-        customer_id,
-        bill_type,
-        provider,
-        amount,
-        "Paid"
-    ))
-
-    conn.commit()
-
-    cursor.close()
-    conn.close()
-    # ---------------- BILL PAYMENT ----------------
-
-def add_bill_payment(customer_id, bill_type, provider, amount):
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    sql = """
-    INSERT INTO bill_payments
-    (customer_id, bill_type, provider, amount, status)
-    VALUES (%s,%s,%s,%s,%s)
-    """
-
-    cursor.execute(sql,(
-        customer_id,
-        bill_type,
-        provider,
-        amount,
-        "Paid"
-    ))
-
-    conn.commit()
-
-    cursor.close()
-    conn.close()
 
 
 
-def get_bill_payments(customer_id):
-
-    conn = get_db_connection()
-
-    cursor = conn.cursor(dictionary=True)
-
-
-    cursor.execute(
-        """
-        SELECT * FROM bill_payments
-        WHERE customer_id=%s
-        ORDER BY payment_date DESC
-        """,
-        (customer_id,)
-    )
-
-
-    bills = cursor.fetchall()
-
-
-    cursor.close()
-    conn.close()
-
-    return bills
-# ---------------- DASHBOARD DATA ----------------
-
-def get_dashboard_data(customer_id):
-
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-
-    # Account balance
-    cursor.execute(
-        "SELECT balance FROM accounts WHERE customer_id=%s",
-        (customer_id,)
-    )
-
-    account = cursor.fetchone()
-
-
-    balance = 0
-
-    if account:
-        balance = account['balance']
-
-
-    # Transaction count
-    cursor.execute(
-        "SELECT COUNT(*) AS total FROM transactions WHERE customer_id=%s",
-        (customer_id,)
-    )
-
-    transactions = cursor.fetchone()['total']
-
-
-    # Loan count
-    cursor.execute(
-        "SELECT COUNT(*) AS total FROM loans WHERE customer_id=%s",
-        (customer_id,)
-    )
-
-    loans = cursor.fetchone()['total']
-
-
-    # Fixed deposit count
-    cursor.execute(
-        "SELECT COUNT(*) AS total FROM fixed_deposits WHERE customer_id=%s",
-        (customer_id,)
-    )
-
-    fd = cursor.fetchone()['total']
-
-
-    cursor.close()
-    conn.close()
-
-
-    return {
-        "balance": balance,
-        "transactions": transactions,
-        "loans": loans,
-        "fd": fd
-    }
 # ---------------- DASHBOARD COUNT FUNCTIONS ----------------
 
 def get_transaction_count(customer_id):
@@ -602,10 +593,11 @@ def get_loan_count(customer_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT COUNT(*) FROM loans WHERE customer_id=%s",
-        (customer_id,)
-    )
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM loans
+        WHERE customer_id = %s
+    """, (customer_id,))
 
     count = cursor.fetchone()[0]
 
@@ -613,9 +605,6 @@ def get_loan_count(customer_id):
     conn.close()
 
     return count
-
-
-
 def get_fd_count(customer_id):
 
     conn = get_db_connection()
@@ -782,3 +771,243 @@ def get_all_customers():
     conn.close()
 
     return customers
+# ---------------- UPDATE PROFILE ----------------
+
+def update_customer(customer_id,name,email,phone,gender,address):
+
+    conn=get_db_connection()
+
+    cursor=conn.cursor()
+
+
+    cursor.execute("""
+    UPDATE customers
+    SET 
+    name=%s,
+    email=%s,
+    phone=%s,
+    gender=%s,
+    address=%s
+
+    WHERE customer_id=%s
+    """,
+    (
+        name,
+        email,
+        phone,
+        gender,
+        address,
+        customer_id
+    ))
+
+
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+
+
+# ---------------- CHANGE PASSWORD ----------------
+
+def update_password(customer_id,password):
+
+    conn=get_db_connection()
+
+    cursor=conn.cursor()
+
+
+    cursor.execute("""
+    UPDATE customers
+    SET password=%s
+    WHERE customer_id=%s
+    """,
+    (
+        password,
+        customer_id
+    ))
+
+
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+    # ---------------- GET TRANSFERS ----------------
+
+def get_transfers(customer_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            transfers.*,
+            beneficiaries.name AS beneficiary_name
+        FROM transfers
+        JOIN beneficiaries
+            ON transfers.beneficiary_id = beneficiaries.beneficiary_id
+        WHERE transfers.customer_id=%s
+        ORDER BY transfer_id DESC
+    """, (customer_id,))
+
+    data = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return data
+
+def get_transfers(customer_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                t.*,
+                b.name AS beneficiary_name
+            FROM transfers t
+            LEFT JOIN beneficiaries b
+                ON t.beneficiary_id = b.beneficiary_id
+            WHERE t.customer_id = %s
+            ORDER BY t.transfer_date DESC
+        """, (customer_id,))
+
+        return cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_all_transfers():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                t.transfer_id,
+                t.customer_id,
+                t.beneficiary_id,
+                t.transfer_type,
+                t.amount,
+                t.remarks,
+                t.status,
+                t.transfer_date,
+                c.name AS name,
+                b.name AS beneficiary_name
+            FROM transfers t
+            JOIN customers c
+                ON t.customer_id = c.customer_id
+            LEFT JOIN beneficiaries b
+                ON t.beneficiary_id = b.beneficiary_id
+            ORDER BY t.transfer_id DESC
+        """)
+
+        return cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()
+def get_bill_payments(customer_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT *
+            FROM bill_payments
+            WHERE customer_id = %s
+            ORDER BY payment_date DESC
+        """, (customer_id,))
+
+        return cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+# ---------------- ADMIN TRANSFER APPROVAL ----------------
+
+def approve_transfer_request(transfer_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE transfers
+            SET status = 'Approved'
+            WHERE transfer_id = %s
+        """, (transfer_id,))
+
+        conn.commit()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ---------------- ADMIN LOAN APPROVAL ----------------
+
+def approve_loan_request(loan_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE loans
+            SET status = 'Approved'
+            WHERE loan_id = %s
+        """, (loan_id,))
+
+        conn.commit()
+
+    finally:
+        cursor.close()
+        conn.close()
+# ---------------- ADMIN TRANSFER APPROVAL ----------------
+
+def approve_transfer_request(transfer_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE transfers
+            SET status = 'Approved'
+            WHERE transfer_id = %s
+        """, (transfer_id,))
+
+        conn.commit()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+# ---------------- ADMIN ALL LOANS ----------------
+
+def get_all_loans():
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                l.*,
+                c.name
+            FROM loans l
+            JOIN customers c
+                ON l.customer_id = c.customer_id
+            ORDER BY l.loan_id DESC
+        """)
+
+        return cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()

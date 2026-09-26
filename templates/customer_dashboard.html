@@ -1,237 +1,816 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | ABC Bank</title>
 
-<title>Customer Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f4f7fb;
+            color: #172033;
+        }
 
-body{
-background:#f4f6f9;
-}
+        /* NAVBAR */
+        .navbar {
+            height: 72px;
+            background: linear-gradient(135deg, #0b1f3a, #123e70);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 5%;
+            color: white;
+            box-shadow: 0 5px 20px rgba(11, 31, 58, 0.15);
+        }
 
-.navbar{
-background:#1f3b5b;
-}
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+        }
 
-.card{
-border:none;
-border-radius:15px;
-}
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-.metric{
-font-size:28px;
-font-weight:bold;
-color:#1f3b5b;
-}
+        .welcome-small {
+            font-size: 13px;
+            opacity: 0.85;
+        }
 
-.sidebar a{
-display:block;
-padding:12px;
-margin-bottom:8px;
-border-radius:8px;
-text-decoration:none;
-color:#1f3b5b;
-font-weight:600;
-}
+        .logout {
+            text-decoration: none;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            padding: 9px 16px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.25s;
+        }
 
-.sidebar a:hover{
-background:#e9ecef;
-}
+        .logout:hover {
+            background: white;
+            color: #123e70;
+        }
 
-</style>
+        /* LAYOUT */
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 72px);
+        }
 
+        /* SIDEBAR */
+        .sidebar {
+            width: 245px;
+            background: white;
+            border-right: 1px solid #e6ebf2;
+            padding: 27px 15px;
+            flex-shrink: 0;
+        }
+
+        .menu-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #9aa5b4;
+            font-weight: 700;
+            padding: 0 12px;
+            margin-bottom: 12px;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #5c697d;
+            padding: 12px 13px;
+            margin-bottom: 5px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .menu a:hover {
+            background: #eef5ff;
+            color: #1761a8;
+            transform: translateX(2px);
+        }
+
+        .menu-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: #edf1f6;
+            margin: 20px 8px;
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            padding: 38px 4%;
+            min-width: 0;
+        }
+
+        .heading {
+            margin-bottom: 27px;
+        }
+
+        .heading h1 {
+            font-size: 30px;
+            color: #102a4c;
+            font-weight: 800;
+            margin-bottom: 7px;
+        }
+
+        .heading p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        /* BALANCE CARD */
+        .balance-card {
+            background: linear-gradient(135deg, #123e70, #1761a8);
+            color: white;
+            border-radius: 22px;
+            padding: 29px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            box-shadow: 0 15px 35px rgba(18, 62, 112, 0.18);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::after {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            right: -45px;
+            top: -65px;
+        }
+
+        .balance-label {
+            font-size: 13px;
+            opacity: 0.8;
+            margin-bottom: 7px;
+        }
+
+        .balance {
+            font-size: 34px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .account-text {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .balance-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.13);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 29px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* STAT CARDS */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 27px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e5ebf3;
+            border-radius: 17px;
+            padding: 21px;
+            box-shadow: 0 7px 22px rgba(15, 35, 65, 0.055);
+            transition: 0.25s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 27px rgba(15, 35, 65, 0.09);
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-title {
+            color: #7a8799;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            width: 39px;
+            height: 39px;
+            border-radius: 10px;
+            background: #eaf2ff;
+            color: #1761a8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+        }
+
+        .stat-number {
+            color: #102a4c;
+            font-size: 25px;
+            font-weight: 800;
+        }
+
+        /* QUICK ACTIONS */
+        .section-title {
+            color: #102a4c;
+            font-size: 19px;
+            font-weight: 750;
+            margin-bottom: 15px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 27px;
+        }
+
+        .quick-action {
+            background: white;
+            border: 1px solid #e5ebf3;
+            border-radius: 14px;
+            padding: 17px;
+            text-decoration: none;
+            color: #172033;
+            transition: 0.2s;
+        }
+
+        .quick-action:hover {
+            border-color: #bdd3ee;
+            transform: translateY(-2px);
+        }
+
+        .quick-icon {
+            font-size: 20px;
+            margin-bottom: 9px;
+        }
+
+        .quick-action h3 {
+            color: #123e70;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .quick-action p {
+            color: #8995a6;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        /* TRANSACTIONS */
+        .transaction-card {
+            background: white;
+            border: 1px solid #e5ebf3;
+            border-radius: 18px;
+            box-shadow: 0 7px 22px rgba(15, 35, 65, 0.055);
+            overflow: hidden;
+        }
+
+        .transaction-header {
+            padding: 21px 24px;
+            border-bottom: 1px solid #edf1f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transaction-header h2 {
+            font-size: 18px;
+            color: #123e70;
+        }
+
+        .view-all {
+            text-decoration: none;
+            color: #1761a8;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #738196;
+            text-align: left;
+            padding: 13px 22px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        td {
+            padding: 16px 22px;
+            border-top: 1px solid #f0f2f5;
+            color: #354052;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .transaction-type {
+            color: #123e70;
+            font-weight: 700;
+        }
+
+        .amount {
+            font-weight: 700;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: #e9f8ef;
+            color: #218653;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .empty {
+            padding: 35px 20px;
+            text-align: center;
+            color: #8995a6;
+            font-size: 13px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1050px) {
+            .sidebar {
+                width: 210px;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 800px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                padding: 30px 5%;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .navbar {
+                padding: 0 5%;
+            }
+
+            .welcome-small {
+                display: none;
+            }
+
+            .heading h1 {
+                font-size: 26px;
+            }
+
+            .balance-card {
+                padding: 24px;
+            }
+
+            .balance {
+                font-size: 28px;
+            }
+
+            .balance-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 22px;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            th,
+            td {
+                padding: 12px 14px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<nav class="navbar navbar-dark">
+<!-- NAVBAR -->
+<nav class="navbar">
 
-<div class="container">
+    <div class="brand">
+        ABC Bank
+    </div>
 
-<a class="navbar-brand fw-bold">
+    <div class="nav-right">
 
-🏦 ABC Bank
+        <span class="welcome-small">
+            Welcome, {{ customer.name }}
+        </span>
 
-</a>
+        <a href="{{ url_for('logout') }}" class="logout">
+            Logout
+        </a>
 
-<a href="/logout" class="btn btn-light">
-
-Logout
-
-</a>
-
-</div>
+    </div>
 
 </nav>
 
-<div class="container-fluid mt-4">
 
-<div class="row">
+<div class="layout">
 
-<div class="col-md-3">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
 
-<div class="card shadow p-3 sidebar">
+        <div class="menu-title">
+            Banking
+        </div>
 
-<h5>{{customer.name}}</h5>
+        <div class="menu">
 
-<hr>
+            <a href="{{ url_for('account') }}">
+                <span class="menu-icon">🏦</span>
+                My Account
+            </a>
 
-<a href="/account">💳 My Account</a>
+            <a href="{{ url_for('transfer') }}">
+                <span class="menu-icon">💸</span>
+                Transfer Money
+            </a>
 
-<a href="/transfer">💸 Fund Transfer</a>
+            <a href="{{ url_for('beneficiary') }}">
+                <span class="menu-icon">👥</span>
+                Beneficiaries
+            </a>
 
-<a href="/beneficiary">👥 Beneficiaries</a>
+            <a href="{{ url_for('billpayment') }}">
+                <span class="menu-icon">🧾</span>
+                Bill Payments
+            </a>
 
-<a href="/billpayment">🧾 Bill Payment</a>
+            <a href="{{ url_for('fixeddeposit') }}">
+                <span class="menu-icon">💰</span>
+                Fixed Deposit
+            </a>
 
-<a href="/fixeddeposit">🏦 Fixed Deposit</a>
+            <a href="{{ url_for('loan') }}">
+                <span class="menu-icon">🏛️</span>
+                Loans
+            </a>
 
-<a href="/loan">📄 Loan</a>
+        </div>
 
-<a href="/transaction">📊 Transactions</a>
 
-<a href="/profile">👤 Profile</a>
+        <div class="sidebar-divider"></div>
 
-</div>
 
-</div>
+        <div class="menu-title">
+            Activity
+        </div>
 
-<div class="col-md-9">
+        <div class="menu">
 
-<h3>
+            <a href="{{ url_for('transaction') }}">
+                <span class="menu-icon">📊</span>
+                Transactions
+            </a>
 
-Welcome,
+            <a href="{{ url_for('profile') }}">
+                <span class="menu-icon">👤</span>
+                My Profile
+            </a>
 
-{{customer.name}}
+        </div>
 
-</h3>
+    </aside>
 
-<div class="row mt-4">
 
-<div class="col-md-3">
+    <!-- MAIN CONTENT -->
+    <main class="main">
 
-<div class="card shadow text-center p-3">
+        <!-- HEADING -->
+        <section class="heading">
 
-<h6>Balance</h6>
+            <h1>
+                Good to see you, {{ customer.name }} 👋
+            </h1>
 
-<div class="metric">
+            <p>
+                Here's an overview of your banking activity.
+            </p>
 
-₹ {{customer.balance}}
+        </section>
 
-</div>
 
-</div>
+        <!-- BALANCE -->
+        <section class="balance-card">
 
-</div>
+            <div>
 
-<div class="col-md-3">
+                <div class="balance-label">
+                    Available Balance
+                </div>
 
-<div class="card shadow text-center p-3">
+                <div class="balance">
+                    ₹ {{ "%.2f"|format(customer.balance) }}
+                </div>
 
-<h6>Transactions</h6>
+                <div class="account-text">
+                    Account No: {{ customer.account_number }}
+                </div>
 
-<div class="metric">
+            </div>
 
-{{transaction_count}}
+            <div class="balance-icon">
+                ₹
+            </div>
 
-</div>
+        </section>
 
-</div>
 
-</div>
+        <!-- STATISTICS -->
+        <section class="stats">
 
-<div class="col-md-3">
+            <div class="stat-card">
 
-<div class="card shadow text-center p-3">
+                <div class="stat-top">
 
-<h6>Loans</h6>
+                    <span class="stat-title">
+                        Transactions
+                    </span>
 
-<div class="metric">
+                    <span class="stat-icon">
+                        📊
+                    </span>
 
-{{loan_count}}
+                </div>
 
-</div>
+                <div class="stat-number">
+                    {{ transactions|length }}
+                </div>
 
-</div>
+            </div>
 
-</div>
 
-<div class="col-md-3">
+            <div class="stat-card">
 
-<div class="card shadow text-center p-3">
+                <div class="stat-top">
 
-<h6>FDs</h6>
+                    <span class="stat-title">
+                        Active Loans
+                    </span>
 
-<div class="metric">
+                    <span class="stat-icon">
+                        🏦
+                    </span>
 
-{{fd_count}}
+                </div>
 
-</div>
+                <div class="stat-number">
+                    {{ loans|length }}
+                </div>
 
-</div>
+            </div>
 
-</div>
 
-</div>
+            <div class="stat-card">
 
-<div class="card shadow mt-4">
+                <div class="stat-top">
 
-<div class="card-header">
+                    <span class="stat-title">
+                        Fixed Deposits
+                    </span>
 
-Recent Transactions
+                    <span class="stat-icon">
+                        💰
+                    </span>
 
-</div>
+                </div>
 
-<div class="card-body">
+                <div class="stat-number">
+                    {{ fixed_deposits|length }}
+                </div>
 
-<table class="table table-striped">
+            </div>
 
-<tr>
+        </section>
 
-<th>Date</th>
 
-<th>Type</th>
+        <!-- QUICK ACTIONS -->
+        <h2 class="section-title">
+            Quick Actions
+        </h2>
 
-<th>Amount</th>
+        <section class="quick-actions">
 
-<th>Status</th>
+            <a href="{{ url_for('transfer') }}" class="quick-action">
 
-</tr>
+                <div class="quick-icon">
+                    💸
+                </div>
 
-{% for t in transactions %}
+                <h3>
+                    Transfer Money
+                </h3>
 
-<tr>
+                <p>
+                    Send money securely.
+                </p>
 
-<td>{{t.transaction_date}}</td>
+            </a>
 
-<td>{{t.transaction_type}}</td>
 
-<td>₹ {{t.amount}}</td>
+            <a href="{{ url_for('billpayment') }}" class="quick-action">
 
-<td>{{t.status}}</td>
+                <div class="quick-icon">
+                    🧾
+                </div>
 
-</tr>
+                <h3>
+                    Pay Bills
+                </h3>
 
-{% endfor %}
+                <p>
+                    Pay utility bills easily.
+                </p>
 
-</table>
+            </a>
 
-</div>
 
-</div>
+            <a href="{{ url_for('fixeddeposit') }}" class="quick-action">
 
-</div>
+                <div class="quick-icon">
+                    💰
+                </div>
 
-</div>
+                <h3>
+                    Fixed Deposit
+                </h3>
+
+                <p>
+                    Manage your deposits.
+                </p>
+
+            </a>
+
+
+            <a href="{{ url_for('loan') }}" class="quick-action">
+
+                <div class="quick-icon">
+                    🏦
+                </div>
+
+                <h3>
+                    Apply for Loan
+                </h3>
+
+                <p>
+                    Submit a loan request.
+                </p>
+
+            </a>
+
+        </section>
+
+
+        <!-- RECENT TRANSACTIONS -->
+        <section class="transaction-card">
+
+            <div class="transaction-header">
+
+                <h2>
+                    Recent Transactions
+                </h2>
+
+                <a href="{{ url_for('transaction') }}" class="view-all">
+                    View All →
+                </a>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                {% if transactions %}
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Date</th>
+                            <th>Transaction</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for t in transactions[:5] %}
+
+                        <tr>
+
+                            <td>
+                                {{ t.transaction_date }}
+                            </td>
+
+                            <td class="transaction-type">
+                                {{ t.transaction_type }}
+                            </td>
+
+                            <td class="amount">
+                                ₹ {{ "%.2f"|format(t.amount) }}
+                            </td>
+
+                            <td>
+                                <span class="status">
+                                    {{ t.status }}
+                                </span>
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+                {% else %}
+
+                <div class="empty">
+                    No transactions available yet.
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </main>
 
 </div>
 
 </body>
-
 </html>
